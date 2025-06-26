@@ -39,4 +39,12 @@ I fixed the issue by:
 1. **Uninstalling the current version of Mongoose**:
    ```bash
    npm uninstall mongoose
+2. **Installing an older stable version (v6.x or v7.x)**:
+   ```bash
+   npm install mongoose@7.6.0
+3. **Running the app again**:
+   ```bash
+   npm run dev
+   
+✅ MongoDB connected successfully!
 
