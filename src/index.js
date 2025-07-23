@@ -8,8 +8,16 @@ import { DB_NAME } from "./constants.js";
 import connectDB from "./db/index.js";
 
 
-connectDB();
-
+connectDB()                 //whenever an asynchronous method get
+.then(() => {               //completed it also returns a promise
+    app.listen(process.env.PORT || 8000, () => {
+        console.log(`Server is running on port: ${process.env.PORT}`)
+    })
+})
+.catch((err) => {
+    console.log("MongoDB connection failed: ", err)
+})                
+                
 
 
 
