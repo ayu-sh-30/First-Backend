@@ -7,8 +7,8 @@ import mongoose from "mongoose";
 import { DB_NAME } from "./constants.js";
 import connectDB from "./db/index.js";
 import express from "express"
-
-const app = express()
+import { app } from "./app.js";
+// const app = express()
 
 connectDB()                 //whenever an asynchronous method get
 .then(() => {               //completed it also returns a promise
