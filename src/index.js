@@ -31,17 +31,6 @@ connectDB()                 //whenever an asynchronous method get
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 /*
 import express from "express";
 const app = express();
