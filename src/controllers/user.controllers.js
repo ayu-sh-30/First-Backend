@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js"
 import {User} from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/Cloudinary.js"
-import { ApiResponse } from "../utils./ApiResponse.js"
+import { ApiResponse }from "../utils/ApiResponse.js"
 // const registerUser = asyncHandler(async (req, res) =>
 // {
 //     res.status(200).json({
@@ -24,7 +24,7 @@ const registerUser = asyncHandler(async (req, res)=>{
     if ([fullname, email, username, password].some((field)=>field?.trim()==="")) {
         throw new ApiError(400, "All fields are required")
     }
-    const userExists = User.findOne({       // if one of the fields is true it will return true, else false
+    const userExists = await User.findOne({       // if one of the fields is true it will return true, else false
         $or: [{username},{email}]
     })
     if(userExists){
