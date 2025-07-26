@@ -9,6 +9,23 @@ import { ApiResponse }from "../utils/ApiResponse.js"
 //         message: "Pehla API testing is succesfull"
 //     })
 // })   
+
+// method to generate access and refresh token
+const generateAccessTokenAndRefreshToken = async(userId)=>{
+    try {
+        const user = await User.findById(userId)
+        const refreshToken = user.generateRefreshToken()
+        const accessToken = user.generateAccessToken()
+        
+        user.refreshToken = refreshToken
+        await user.save({ validateBeforeSave: false })
+
+        return {accessToken, refreshToken}
+    } catch (error) {
+        throw new ApiError(500, "Something went wrong while generating access and refresh token")
+    }
+}
+
 const registerUser = asyncHandler(async (req, res)=>{
     // get user details from frontend
     // validation - not empty
@@ -62,7 +79,81 @@ const registerUser = asyncHandler(async (req, res)=>{
         new ApiResponse(200, createdUser, "User registered successfully")
     )
 })  
+// making login
+const loginUser = asyncHandler(async (req, res)=>
+{
+    // retrieve data from req. body
+    // check username or email
+    // find the user
+    // password check
+    // access and refresh token generate karke user ko do
+    // send cookie as a response
 
+    const {email, username, password} = req.body
+    if(!email || !username){
+        throw new ApiError(400, "username or email is required")
+    }
+
+    const user = await User.findOne({
+        $or: [{username},{email}]
+    })
+    if(!user){
+        throw new ApiError(404, "User does not exist")
+    }
+    const idPasswordValid = await user.isPasswordCorrect(password)
+    if(!isPasswordCorrect){
+        throw new ApiError(401, "Invalid user credentials")
+    }
+    const {accessToken, refreshToken}= await generateAccessTokenAndRefreshToken(user._id)
+
+    const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
+    // cookie options
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+    .status(200)
+    .cookie("Access Token: ", accessToken, options)
+    .cookie("Refresh Token: ", refreshToken, options)
+    .json(
+        new ApiResponse(200,
+            {
+                user: loggedInUser, accessToken, refreshToken
+            },
+            "User Logged in Successfully"
+        )
+    )
+})
+const logoutUser = asyncHandler(async (req, res)=>{
+    // whenever user clicks on logout -> we need to first clear his cookies also the refreshToken
+    // needs to be deleted to
+
+    // the question is how we will access the userID that has logged in???
+
+    await User.findByIdAndUpdate(
+         req.user._id,
+        {
+            refreshToken: undefined
+        },
+        {
+            new: true       
+        }
+    )
+    const options = {
+        httpOnly: true,
+        secure: true
+    }
+    return res
+    .status(200)
+    .cookie("accessToken", options)
+    .cookie("refreshToken", options)
+    .json(
+        new ApiResponse(200, {}, "User logged Out")
+    )
+})
 export {
     registerUser,
+    loginUser,
+    logoutUser
 }
