@@ -13,6 +13,7 @@ import { ApiResponse }from "../utils/ApiResponse.js"
 // method to generate access and refresh token
 const generateAccessTokenAndRefreshToken = async(userId)=>{
     try {
+        console.log('Generating tokens for userId:', userId);
         const user = await User.findById(userId)
         const refreshToken = user.generateRefreshToken()
         const accessToken = user.generateAccessToken()
@@ -22,6 +23,7 @@ const generateAccessTokenAndRefreshToken = async(userId)=>{
 
         return {accessToken, refreshToken}
     } catch (error) {
+        console.error('Error in generateAccessTokenAndRefreshToken:', error);
         throw new ApiError(500, "Something went wrong while generating access and refresh token")
     }
 }
@@ -90,7 +92,7 @@ const loginUser = asyncHandler(async (req, res)=>
     // send cookie as a response
 
     const {email, username, password} = req.body
-    if(!email || !username){
+    if(!(email || username)){
         throw new ApiError(400, "username or email is required")
     }
 
@@ -100,22 +102,22 @@ const loginUser = asyncHandler(async (req, res)=>
     if(!user){
         throw new ApiError(404, "User does not exist")
     }
-    const idPasswordValid = await user.isPasswordCorrect(password)
-    if(!isPasswordCorrect){
+    const isPasswordValid = await user.isPasswordCorrect(password)
+    if(!isPasswordValid){
         throw new ApiError(401, "Invalid user credentials")
     }
-    const {accessToken, refreshToken}= await generateAccessTokenAndRefreshToken(user._id)
+    const {accessToken, refreshToken} = await generateAccessTokenAndRefreshToken(user._id)
 
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
     // cookie options
     const options = {
         httpOnly: true,
         secure: true
-    }
+    } 
     return res
     .status(200)
-    .cookie("Access Token: ", accessToken, options)
-    .cookie("Refresh Token: ", refreshToken, options)
+    .cookie("accessToken", accessToken, options)  //inside "" cannot have trailing/leading spaces or special characters other than -
+    .cookie("refreshToken", refreshToken, options)
     .json(
         new ApiResponse(200,
             {

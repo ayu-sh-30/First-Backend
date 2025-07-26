@@ -15,6 +15,7 @@ app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({extended:true, limit:"16kb"}))
 app.use(express.static("public"))
 
+app.use(cookieParser()) // this should always be written before the routes
 // ham yaha pe hi generally apne routes likhte hai
 // import user Routes
 import userRouter from "./routes/user.routes.js"
@@ -23,5 +24,5 @@ app.use("/api/v1/users",userRouter)
 
 //http://localhost:8000/api/v1/users/register 
 
-app.use(cookieParser())
+
 export { app }
